@@ -2,17 +2,17 @@
 ![Alt text](<Screenshot 2024-01-30 132500.png>)
 ---
 ## **Project Overview**
-**Objective:**
+#### **Objective:**
     - Design and implement a disaster recovery solution for an AWS-hosted e-commerce application.
-**Focus:**
+#### **Focus:**
     - Minimise downtime and data loss during catastrophic events.
-**Goals:**
+#### **Goals:**
     - Automate failover processes for seamless traffic redirection.
     - Prevent or minimize data loss through robust recovery measures.
-**Challenges:**
+#### **Challenges:**
     - Mitigate server failures and data corruption risks.
     - Implement proactive monitoring to detect issues ahead of time
-**Outcome:**
+#### **Outcome:**
     - A resilient e-commerce platform ensuring uninterrupted customer experiences.
 
 ## **Infrastructure Design**

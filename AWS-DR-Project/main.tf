@@ -13,7 +13,7 @@ resource "aws_s3_bucket_object" "index_html" {
   bucket = var.aws_s3_bucket
   key    = "index.html"  
 
-  source = "C:/Users/musam/d/AWS-Disaster-Recovery/index.html"  
+  source = "${var.lambda_function_dir}index.html"  
 }
 
 data "aws_iam_policy_document" "lambda_policy" {
@@ -58,27 +58,27 @@ resource "aws_iam_role_policy_attachment" "lambda_policy_attachment" {
 
 data "archive_file" "lambda_zip1" {
   type        = "zip"
-  source_dir  = "C:/Users/musam/d/AWS-Disaster-Recovery/lambda_function/"
-  output_path = "C:/Users/musam/d/AWS-Disaster-Recovery/lambda_function/scale-resources.zip"
+  source_dir  = "${var.lambda_function_dir}"
+  output_path = "${var.lambda_function_dir}scale-resources.zip"
 }
 
 data "archive_file" "lambda_zip2" {
   type        = "zip"
-  source_dir  = "C:/Users/musam/d/AWS-Disaster-Recovery/lambda_function/"
-  output_path = "C:/Users/musam/d/AWS-Disaster-Recovery/lambda_function/redirect-traffic.zip"
+  source_dir  = "${var.lambda_function_dir}"
+  output_path = "${var.lambda_function_dir}redirect-traffic.zip"
 }
 
 data "archive_file" "lambda_zip3" {
   type        = "zip"
-  source_dir  = "C:/Users/musam/d/AWS-Disaster-Recovery/lambda_function/"
-  output_path = "C:/Users/musam/d/AWS-Disaster-Recovery/lambda_function/replicate-maintaindata.zip"
+  source_dir  = "${var.lambda_function_dir}"
+  output_path = "${var.lambda_function_dir}replicate-maintaindata.zip"
 }
 
 resource "aws_lambda_function" "scale-resources" {
   function_name = "scale-resources"
   handler       = "index.handler"  
   runtime       = "python3.8"
-  filename      = "C:/Users/musam/d/AWS-Disaster-Recovery/lambda_function/scale-resources.zip"
+  filename      = "${var.lambda_function_dir}scale-resources.zip"
   role          = aws_iam_role.iam_for_lambda.arn
 }
 
@@ -86,7 +86,7 @@ resource "aws_lambda_function" "redirect-traffic" {
   function_name = "redirect-traffic"
   handler       = "index.handler"  
   runtime       = "python3.8"
-  filename      = "C:/Users/musam/d/AWS-Disaster-Recovery/lambda_function/redirect-traffic.zip"
+  filename      = "${var.lambda_function_dir}redirect-traffic.zip"
   role          = aws_iam_role.iam_for_lambda.arn
 }
 
@@ -94,15 +94,15 @@ resource "aws_lambda_function" "replicate-maintaindata" {
   function_name = "maintain-data-consistency"
   handler       = "index.handler"  
   runtime       = "python3.8"
-  filename      = "C:/Users/musam/d/AWS-Disaster-Recovery/lambda_function/replicate-maintaindata.zip"
+  filename      = "${var.lambda_function_dir}replicate-maintaindata.zip"
   role          = aws_iam_role.iam_for_lambda.arn
 }
 
 resource "aws_launch_configuration" "my_launch_config" {
-  name                 = "AWS-DR-Project-EC2"
-  image_id             = "ami-0e5f882be1900e43b"
+  name                 = var.instance_name
+  image_id             = var.image_id_id
   instance_type        = var.instance_type
-  key_name             = "main-key"
+  key_name             = var.key_name
 
   user_data = <<-EOF
     #!/bin/bash
@@ -133,20 +133,20 @@ resource "aws_security_group" "my_security_group" {
 }
 
 resource "aws_vpc" "my_vpc" {
-  cidr_block = "10.0.0.0/16"
+  cidr_block = var.vpc_cidr_block
 }
 
 resource "aws_subnet" "my_subnet_a" {
   vpc_id                  = aws_vpc.my_vpc.id
-  cidr_block              = "10.0.0.0/24"
-  availability_zone       = "eu-west-2a"
+  cidr_block              = var.subnet_a_cidr_block
+  availability_zone       = var.availability_zone_a
   map_public_ip_on_launch = true
 }
 
 resource "aws_subnet" "my_subnet_b" {
   vpc_id                  = aws_vpc.my_vpc.id
-  cidr_block              = "10.0.1.0/24"
-  availability_zone       = "eu-west-2b"
+  cidr_block              = var.subnet_b_cidr_block
+  availability_zone       = var.availability_zone_b
   map_public_ip_on_launch = true
 }
 
@@ -171,8 +171,8 @@ resource "aws_db_instance" "my_db_instance" {
     instance_class        = "db.t2.micro"
     allocated_storage     = 20
     storage_type          = "gp2"
-    username              = "admin"
-    password              = "password"
+    username              = var.db_username
+    password              = var.db_password
     publicly_accessible  = false
     vpc_security_group_ids = [aws_security_group.my_security_group.id]
     db_subnet_group_name  = aws_db_subnet_group.my_db_subnet_group.name

@@ -39,7 +39,6 @@
    - Double-check your IAM role policy syntax for any typos or missing elements.
    - Verify that the policy includes only the required STS AssumeRole actions.
    - Ensure that the IAM role is correctly attached to the Lambda function.
-![Alt text](<Screenshot 2024-01-29 062013.png>)
 
 **All of my AWS resources were successfully made**
 ![Alt text](<Screenshot 2024-01-30 121404.png>)
